@@ -60,6 +60,10 @@ COPY --from=compilacion /app/.next/static ./.next/static
 COPY --from=compilacion /app/public ./public
 
 COPY docker/arranque.sh /arranque.sh
+# El bit de ejecución no sobrevive a un checkout en Windows. Sin él, el
+# docker-entrypoint de la imagen de node antepone `node` al CMD y acaba
+# ejecutando el script de shell como JavaScript.
+RUN chmod +x /arranque.sh
 
 # Se ejecuta como root a propósito: el disco que monta Render llega con dueño
 # root. Cuando se quite el disco, esto puede pasar a un usuario sin privilegios.
