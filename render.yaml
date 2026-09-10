@@ -1,0 +1,95 @@
+# Render — plano del servicio.
+#
+# La imagen se construye en tu máquina (`docker build`) y se sube a un
+# registro, porque la base y las fotos están fuera de git y Render, compilando
+# desde el repositorio, publicaría una web vacía.
+#
+#   docker build -t topgambajrjdeveloper/jhonbosch-photography:latest .
+#   docker push topgambajrjdeveloper/jhonbosch-photography:latest
+#
+# La base vive en Neon (Postgres) y las fotografías en un cubo privado de
+# Backblaze B2. Ninguna de las dos está en la imagen, así que un despliegue ya
+# no puede perder nada.
+
+services:
+  - type: web
+    name: jhonbosch-photography
+    runtime: image
+    region: frankfurt
+    # El disco exige plan de pago; en el gratuito, cada despliegue vuelve a la
+    # semilla de la imagen y se pierde lo escrito desde entonces.
+    plan: starter
+
+    image:
+      url: docker.io/topgambajrjdeveloper/jhonbosch-photography:latest
+
+    healthCheckPath: /
+
+    # El disco vuelve a tener un cometido, y no es el de antes: guarda las
+    # fotografías YA RECODIFICADAS por el optimizador de Next. Sin él, cada
+    # despliegue tira esa caché y las 289 vuelven a generarse una a una en una
+    # instancia de 0,1 CPU — que es exactamente lo que hacía que la web
+    # tardase en poblarse. Con él, sólo se paga la primera vez.
+    disk:
+      name: datos
+      mountPath: /datos
+      sizeGB: 5
+
+    envVars:
+      # La cadena de Neon. `sync: false` = Render la pide al desplegar y no
+      # queda escrita en el repositorio.
+      - key: DATABASE_URL
+        sync: false
+      # NextAuth v5 deduce la dirección de las cabeceras que pone Render.
+      - key: AUTH_TRUST_HOST
+        value: "true"
+      # Con lo que se firman las sesiones del panel. Este plano la genera sola,
+      # pero OJO: sólo si el servicio se creó aplicando el plano. Creado a mano
+      # desde la imagen, hay que ponerla a mano o entrar al panel dará 500.
+      - key: AUTH_SECRET
+        generateValue: true
+      # Dónde vive el sitio. Sale en las direcciones del sitemap, en las
+      # canónicas y en lo que se ve al compartir un enlace. Sin ella se cae al
+      # dominio de Render, que funciona pero no es el que quieres indexado.
+      - key: SITIO_URL
+        value: https://jhonbosch-photography-latest.onrender.com
+
+      # Backblaze B2. Las cinco o ninguna: sin ellas el sitio despliega sin una
+      # sola fotografía. Las tres primeras no son secretas; las dos claves van
+      # con `sync: false` para que Render las pida y no queden en el repositorio.
+      - key: S3_BUCKET
+        value: photo-jhon
+      - key: S3_ENDPOINT
+        value: https://s3.us-east-005.backblazeb2.com
+      - key: S3_REGION
+        value: us-east-005
+      - key: S3_ACCESS_KEY
+        sync: false
+      - key: S3_SECRET_KEY
+        sync: false
+
+      # REDIS_URL va a propósito SIN poner: sin ella la web funciona igual,
+      # consultando la base en cada visita. Ver el bloque de abajo.
+
+# --- La caché, cuando toque ---------------------------------------------------
+#
+# Dragonfly NO cabe en el plan gratuito, por dos razones que conviene tener
+# escritas antes de intentarlo:
+#
+#   · Exige 256 MiB por hilo. Con 512 MB de instancia se queda sin sitio.
+#   · El plan gratuito de Render no ofrece servicios privados, así que sería
+#     un segundo servicio de pago.
+#
+# Y en una instancia de 0,1 CPU tampoco es lo que más duele: lo caro es que
+# `sharp` recodifique una foto (10 s medidos), no leer 59 filas de SQLite.
+#
+# Cuando el plan dé para ello, se añade así y se pone REDIS_URL arriba
+# apuntando a `redis://jhonbosch-cache:6379`:
+#
+#   - type: pserv
+#     name: jhonbosch-cache
+#     runtime: image
+#     plan: starter
+#     image:
+#       url: docker.dragonflydb.io/dragonflydb/dragonfly:latest
+#     dockerCommand: dragonfly --proactor_threads=1 --maxmemory=256mb --cache_mode=true --dbfilename=

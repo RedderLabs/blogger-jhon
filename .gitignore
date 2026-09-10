@@ -39,3 +39,24 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/app/generated/prisma
+
+# entorno
+.env
+dev.db
+dev.db-journal
+lib/generated/
+public/tinymce/
+
+# grafo de conocimiento (se regenera con `graphify update .`)
+graphify-out/
+
+# materiales de diseno (PDFs y JPGs de referencia)
+diseno/
+
+# notas sueltas
+gt.txt
+
+# el ejemplo de entorno si va, no lleva secretos
+!.env.example

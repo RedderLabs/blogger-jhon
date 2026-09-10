@@ -1,0 +1,56 @@
+# Photo Jhon — el sitio y su caché, juntos.
+#
+# Dragonfly no se levanta a mano: se declara aquí, junto a la imagen, y los dos
+# se hablan por nombre dentro de la red de Compose. Así da igual lo que tengas
+# escuchando en el 6379 de tu máquina (un Redis de Windows, por ejemplo).
+#
+#   docker compose up -d --build
+#   docker compose logs -f web
+#
+# Para el `npm run dev` de siempre, que corre fuera de Compose, Dragonfly sí
+# asoma al anfitrión, pero en el 6380 para no chocar con nada.
+
+name: photo-jhon
+
+services:
+  web:
+    build: .
+    image: topgambajrjdeveloper/jhonbosch-photography:latest
+    restart: unless-stopped
+    ports:
+      # Cambiable con PUERTO_WEB si ya tienes algo en el 3000.
+      - "${PUERTO_WEB:-3000}:3000"
+    environment:
+      # Sale de tu .env: la base vive en Neon, no en el contenedor.
+      DATABASE_URL: ${DATABASE_URL:?hace falta DATABASE_URL en .env}
+      # Por nombre de servicio: dentro de la red no hace falta publicar puertos.
+      REDIS_URL: redis://dragonfly:6379
+      AUTH_TRUST_HOST: "true"
+      AUTH_SECRET: ${AUTH_SECRET:?hace falta AUTH_SECRET en .env}
+    volumes:
+      - datos:/datos
+    depends_on:
+      - dragonfly
+
+  dragonfly:
+    image: docker.dragonflydb.io/dragonflydb/dragonfly:latest
+    restart: unless-stopped
+    # Dragonfly usa memoria bloqueada; sin esto se queja al arrancar.
+    ulimits:
+      memlock: -1
+    command:
+      # Dragonfly abre un hilo por CPU y exige 256 MiB por hilo: en una
+      # máquina de 28 núcleos pediría 7 GiB y se niega a arrancar. Para
+      # guardar unas pocas consultas, un hilo va de sobra.
+      - "--proactor_threads=1"
+      - "--maxmemory=256mb"
+      # Modo caché: cuando se llena, tira lo más frío en vez de dar error.
+      - "--cache_mode=true"
+      # Sin instantáneas en disco: esto es una caché, lo que se pierda se
+      # vuelve a calcular desde SQLite.
+      - "--dbfilename="
+    ports:
+      - "6380:6379"
+
+volumes:
+  datos:

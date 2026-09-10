@@ -1,0 +1,21 @@
+# Lo que no tiene por qué viajar al contexto de construcción.
+node_modules
+.next
+.git
+.env
+.env.*
+*.tsbuildinfo
+
+# Documentación y herramientas de trabajo: pesan 19 MB y no las usa el sitio.
+diseno
+graphify-out
+.agents
+.claude
+.windsurf
+
+# El cliente de Prisma se regenera dentro de la imagen.
+lib/generated
+
+# TinyMCE se copia de node_modules dentro de la imagen, en el prebuild: mandar
+# los 5,4 MB en el contexto sería mandarlos para volver a generarlos.
+public/tinymce

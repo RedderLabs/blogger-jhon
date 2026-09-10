@@ -1,0 +1,1149 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Fuera de los buscadores a propósito: es un documento interno. Lo mismo
+     pide /robots.txt y lo repite la cabecera X-Robots-Tag del servidor. -->
+<meta name="robots" content="noindex, nofollow, noarchive">
+
+<style>
+  /* Reinicio mínimo: este fichero se sirve suelto, sin la hoja del sitio. */
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; }
+  img, svg { max-width: 100%; height: auto; display: block; }
+</style>
+<title>Manual del cuarto oscuro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Bodoni+Moda:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&display=swap">
+
+<style>
+  /* ————————————————————————————————————————————————
+     La paleta es la del propio sitio: los mismos valores que
+     app/globals.css. El manual tiene que parecer parte del programa,
+     no un folleto que llega de fuera.
+     Por omisión, cuarto oscuro. Quien prefiera papel, lo tiene.
+     ———————————————————————————————————————————————— */
+  :root {
+    --cuarto: #100e0d;
+    --cuarto-2: #0c0a09;
+    --marco: #191614;
+    --papel: #ede7de;
+    --papel-2: #beb5aa;
+    --dato: #9c938a;
+    --filo: #2c2622;
+    --filo-2: #4a423b;
+    --apagado: #5c554e;
+    --rojo: #d9503a;
+    --verde: #7c9470;
+    --montaje: #767676;
+
+    --serif: "Bodoni Moda", "Times New Roman", Times, serif;
+    --sans: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    --mono: "DM Mono", "SFMono-Regular", Consolas, monospace;
+
+    --medida: 66ch;
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --cuarto: #f4f1ea;
+      --cuarto-2: #ebe5da;
+      --marco: #dcd4c4;
+      --papel: #17130f;
+      --papel-2: #443b31;
+      --dato: #6a6055;
+      --filo: #d3c9b9;
+      --filo-2: #ab9e8b;
+      --apagado: #8b8073;
+      --rojo: #b83f28;
+      --verde: #55704b;
+    }
+  }
+
+  :root[data-theme="light"] {
+    --cuarto: #f4f1ea;
+    --cuarto-2: #ebe5da;
+    --marco: #dcd4c4;
+    --papel: #17130f;
+    --papel-2: #443b31;
+    --dato: #6a6055;
+    --filo: #d3c9b9;
+    --filo-2: #ab9e8b;
+    --apagado: #8b8073;
+    --rojo: #b83f28;
+    --verde: #55704b;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--cuarto);
+    color: var(--papel);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ————— El borde de película. El único gesto fuerte de la página,
+     y va sólo aquí arriba. Los agujeros son los del paso universal. ————— */
+  .pelicula {
+    height: 22px;
+    background:
+      repeating-linear-gradient(
+        to right,
+        transparent 0 10px,
+        var(--filo-2) 10px 20px,
+        transparent 20px 30px
+      );
+    border-bottom: 1px solid var(--filo);
+    opacity: .5;
+  }
+
+  .envoltura {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 20px 96px;
+    display: grid;
+    gap: 0 56px;
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 1000px) {
+    .envoltura { grid-template-columns: 210px minmax(0, 1fr); }
+  }
+
+  /* ————————————————————— cabecera ————————————————————— */
+  header.principal {
+    grid-column: 1 / -1;
+    padding: 56px 0 40px;
+    border-bottom: 1px solid var(--filo);
+    display: grid;
+    gap: 18px;
+  }
+
+  .lbl {
+    font-family: var(--mono);
+    font-size: .625rem;
+    letter-spacing: .28em;
+    text-transform: uppercase;
+    color: var(--rojo);
+    margin: 0;
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: clamp(2.4rem, 7vw, 4rem);
+    line-height: .98;
+    letter-spacing: -.02em;
+    margin: 0;
+    max-width: 15ch;
+    text-wrap: balance;
+  }
+
+  .entradilla {
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    color: var(--papel-2);
+    max-width: 60ch;
+    margin: 0;
+  }
+
+  .credenciales {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 28px;
+    margin-top: 6px;
+    padding-top: 20px;
+    border-top: 1px solid var(--filo);
+    font-family: var(--mono);
+    font-size: .72rem;
+    letter-spacing: .04em;
+    color: var(--dato);
+  }
+  .credenciales b { color: var(--papel); font-weight: 400; }
+
+  /* ————————————————————— índice lateral ————————————————————— */
+  nav.indice {
+    display: none;
+  }
+
+  @media (min-width: 1000px) {
+    nav.indice {
+      display: block;
+      position: sticky;
+      top: 28px;
+      align-self: start;
+      padding-top: 44px;
+      max-height: calc(100vh - 56px);
+      overflow-y: auto;
+    }
+  }
+
+  nav.indice p {
+    font-family: var(--mono);
+    font-size: .5625rem;
+    letter-spacing: .24em;
+    text-transform: uppercase;
+    color: var(--apagado);
+    margin: 0 0 12px;
+  }
+
+  nav.indice ol {
+    list-style: none;
+    margin: 0 0 26px;
+    padding: 0;
+    display: grid;
+    gap: 1px;
+  }
+
+  nav.indice a {
+    display: block;
+    padding: 5px 0;
+    font-size: .84rem;
+    color: var(--dato);
+    text-decoration: none;
+    border-left: 2px solid transparent;
+    padding-left: 12px;
+    transition: color .15s, border-color .15s;
+  }
+  nav.indice a:hover,
+  nav.indice a:focus-visible {
+    color: var(--papel);
+    border-left-color: var(--rojo);
+  }
+
+  /* ————————————————————— cuerpo ————————————————————— */
+  main { padding-top: 44px; min-width: 0; }
+
+  section { margin-bottom: 68px; scroll-margin-top: 24px; }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: clamp(1.5rem, 3.4vw, 2rem);
+    line-height: 1.1;
+    letter-spacing: -.01em;
+    margin: 0 0 8px;
+    text-wrap: balance;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: .01em;
+    margin: 30px 0 6px;
+  }
+
+  .rotulo-seccion {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 22px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--filo);
+  }
+  .rotulo-seccion .lbl { color: var(--dato); flex-shrink: 0; }
+  .rotulo-seccion .raya { height: 1px; background: var(--filo); flex: 1; }
+
+  p { max-width: var(--medida); margin: 0 0 14px; }
+  p.suelto { margin-bottom: 22px; }
+
+  strong { font-weight: 600; color: var(--papel); }
+  em { font-style: italic; }
+
+  a { color: var(--rojo); text-underline-offset: 3px; }
+
+  code {
+    font-family: var(--mono);
+    font-size: .86em;
+    background: var(--marco);
+    border: 1px solid var(--filo);
+    padding: .08em .38em;
+    color: var(--papel-2);
+  }
+
+  ul, ol.lista { max-width: var(--medida); padding-left: 0; list-style: none; margin: 0 0 20px; }
+  ul li, ol.lista li {
+    position: relative;
+    padding-left: 22px;
+    margin-bottom: 9px;
+  }
+  ul li::before {
+    content: "";
+    position: absolute;
+    left: 2px;
+    top: .68em;
+    width: 7px;
+    height: 1px;
+    background: var(--rojo);
+  }
+
+  /* ————— Los pasos. Van numerados porque son una secuencia de verdad:
+     sin el paso 1 no hay paso 2. Y el número es de fotograma, como los
+     que el propio panel pone bajo cada foto. ————— */
+  .pasos { display: grid; gap: 0; margin: 26px 0 0; }
+
+  .paso {
+    display: grid;
+    grid-template-columns: 54px minmax(0, 1fr);
+    gap: 0 20px;
+    padding: 24px 0;
+    border-top: 1px solid var(--filo);
+  }
+  .paso:last-child { border-bottom: 1px solid var(--filo); }
+
+  .paso .numero {
+    font-family: var(--mono);
+    font-size: 1.5rem;
+    font-weight: 300;
+    line-height: 1;
+    color: var(--rojo);
+    font-variant-numeric: tabular-nums;
+    padding-top: 2px;
+  }
+
+  .paso h3 { margin: 0 0 8px; font-size: 1.0625rem; }
+  .paso p { margin-bottom: 10px; }
+  .paso > div > *:last-child { margin-bottom: 0; }
+
+  /* ————— Fichas de cada sección del panel ————— */
+  .secciones { display: grid; gap: 1px; background: var(--filo); border: 1px solid var(--filo); margin-top: 24px; }
+
+  .seccion-panel {
+    background: var(--cuarto);
+    padding: 20px 22px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+
+  @media (min-width: 720px) {
+    .seccion-panel { grid-template-columns: 148px minmax(0, 1fr); gap: 0 24px; align-items: start; }
+  }
+
+  .seccion-panel .nombre {
+    font-family: var(--mono);
+    font-size: .74rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--papel);
+    padding-top: 3px;
+  }
+  .seccion-panel p { margin: 0; font-size: .95rem; color: var(--papel-2); max-width: 58ch; }
+  .seccion-panel p + p { margin-top: 8px; }
+
+  /* ————— Avisos ————— */
+  .aviso {
+    border-left: 2px solid var(--rojo);
+    background: color-mix(in srgb, var(--rojo) 7%, transparent);
+    padding: 16px 20px;
+    margin: 22px 0;
+    max-width: var(--medida);
+  }
+  .aviso p { margin: 0; font-size: .95rem; }
+  .aviso p + p { margin-top: 10px; }
+  .aviso .titulo {
+    font-family: var(--mono);
+    font-size: .625rem;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--rojo);
+    display: block;
+    margin-bottom: 7px;
+  }
+
+  .nota-lateral {
+    border-left: 2px solid var(--filo-2);
+    padding: 14px 20px;
+    margin: 22px 0;
+    max-width: var(--medida);
+  }
+  .nota-lateral p { margin: 0; font-size: .92rem; color: var(--dato); }
+
+  /* ————— Estados ————— */
+  .estados { display: grid; gap: 14px; margin: 20px 0 24px; max-width: var(--medida); }
+
+  .estado {
+    display: grid;
+    grid-template-columns: 128px minmax(0, 1fr);
+    gap: 4px 18px;
+    align-items: baseline;
+  }
+  @media (max-width: 560px) { .estado { grid-template-columns: minmax(0, 1fr); } }
+
+  .pastilla {
+    font-family: var(--mono);
+    font-size: .66rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border: 1px solid currentColor;
+    justify-self: start;
+  }
+  .pastilla.verde { color: var(--verde); }
+  .pastilla.roja { color: var(--rojo); }
+  .pastilla.gris { color: var(--apagado); }
+
+  .estado span.que { font-size: .95rem; color: var(--papel-2); }
+
+  /* ————— Tabla ————— */
+  .tabla-marco { overflow-x: auto; margin: 22px 0; border: 1px solid var(--filo); }
+  table { border-collapse: collapse; width: 100%; min-width: 480px; font-size: .92rem; }
+  th, td { text-align: left; padding: 11px 16px; border-bottom: 1px solid var(--filo); vertical-align: top; }
+  th {
+    font-family: var(--mono);
+    font-size: .625rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--dato);
+    font-weight: 400;
+    background: var(--marco);
+  }
+  tr:last-child td { border-bottom: none; }
+  td.px { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--papel); white-space: nowrap; }
+
+  /* ————— Pie ————— */
+  footer.final {
+    grid-column: 1 / -1;
+    margin-top: 24px;
+    padding-top: 28px;
+    border-top: 1px solid var(--filo);
+    font-family: var(--mono);
+    font-size: .7rem;
+    letter-spacing: .05em;
+    color: var(--apagado);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 32px;
+  }
+
+  :focus-visible { outline: 2px solid var(--rojo); outline-offset: 3px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="pelicula" aria-hidden="true"></div>
+
+<div class="envoltura">
+
+  <header class="principal">
+    <p class="lbl">Photo Jhon · manual del panel</p>
+    <h1>El cuarto oscuro</h1>
+    <p class="entradilla">
+      Todo lo que se ve en la web sale de aquí. Este manual va en el orden en que
+      se usa el panel la primera vez: entrar, subir un rollo, repartirlo en series
+      y publicarlo. Lo demás se lee cuando haga falta.
+    </p>
+    <div class="credenciales">
+      <span>Panel: <b>/admin</b></span>
+      <span>Usuario: <b>jhon@photojhon.com</b></span>
+      <span>Se llama <b>Cuarto oscuro</b> dentro del programa</span>
+    </div>
+  </header>
+
+  <nav class="indice" aria-label="Índice del manual">
+    <p>Índice</p>
+    <ol>
+      <li><a href="#entrar">Entrar</a></li>
+      <li><a href="#como-piensa">Cómo está organizado</a></li>
+      <li><a href="#primera-vez">La primera vez</a></li>
+      <li><a href="#secciones">Cada sección</a></li>
+      <li><a href="#cuaderno">Escribir en el cuaderno</a></li>
+      <li><a href="#portada">Mandar en la portada</a></li>
+      <li><a href="#reglas">Reglas que no se saltan</a></li>
+      <li><a href="#donde-vive">Dónde vive todo esto</a></li>
+      <li><a href="#problemas">Si algo va mal</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <!-- ————————————————— 1 ————————————————— -->
+    <section id="entrar">
+      <div class="rotulo-seccion">
+        <p class="lbl">Para empezar</p>
+        <span class="raya"></span>
+      </div>
+      <h2>Entrar</h2>
+      <p class="suelto">
+        A la dirección de la web, añádele <code>/admin</code> al final. Pide el
+        correo y la contraseña, y con eso ya estás dentro. La sesión dura un mes,
+        así que no hay que entrar cada día.
+      </p>
+      <p>
+        El correo es <strong>jhon@photojhon.com</strong>. La contraseña no está
+        escrita en ningún sitio a propósito, ni siquiera en este manual: si la
+        pierdes, se genera una nueva. No hay forma de recuperar la anterior, y eso
+        es lo correcto.
+      </p>
+
+      <div class="nota-lateral">
+        <p>
+          El panel no sale en Google ni lo encuentra nadie por casualidad: está
+          marcado para que ningún buscador lo indexe. Aun así, la contraseña es
+          lo único que separa tu archivo de cualquiera que escriba esa dirección.
+        </p>
+      </div>
+    </section>
+
+    <!-- ————————————————— 2 ————————————————— -->
+    <section id="como-piensa">
+      <div class="rotulo-seccion">
+        <p class="lbl">Antes de tocar nada</p>
+        <span class="raya"></span>
+      </div>
+      <h2>Cómo está organizado</h2>
+      <p class="suelto">
+        Conviene entender esto antes que ningún botón, porque explica por qué el
+        panel pide las cosas en el orden en que las pide.
+      </p>
+
+      <h3>Las fotos entran por rollo</h3>
+      <p>
+        Un <strong>rollo</strong> es el lote que escaneas de una vez. Cuando subes
+        un rollo, los datos que son comunes a todo el lote —cámara, óptica,
+        película, revelado— se escriben una sola vez y se copian en la ficha de
+        cada fotograma. Después puedes corregir foto a foto lo que haga falta.
+      </p>
+
+      <h3>Pero se navegan por serie</h3>
+      <p>
+        Una <strong>serie</strong> es un trabajo con principio y, a veces, final.
+        Es la unidad con la que se recorre la web: quien entra ve series, no
+        fechas. Desde el rollo repartes cada fotograma en la serie a la que
+        pertenece, y <strong>una misma foto puede estar en varias</strong>.
+      </p>
+
+      <h3>La fecha existe, pero está al fondo</h3>
+      <p class="suelto">
+        La sección <em>Archivo</em> de la web enseña todo por fecha, como estaba
+        en el blog. Es la memoria del sitio, no su portada: está para que nada de
+        lo antiguo se pierda, no para que sea el camino principal.
+      </p>
+
+      <div class="aviso">
+        <span class="titulo">Lo que más se malinterpreta</span>
+        <p>
+          Subir una foto <strong>no</strong> la publica. Todo lo que sube entra
+          como <em>borrador</em> y no lo ve nadie hasta que tú lo publiques.
+          Puedes subir un rollo entero, dejarlo reposar una semana y decidir
+          después. Es deliberado.
+        </p>
+      </div>
+    </section>
+
+    <!-- ————————————————— 3 ————————————————— -->
+    <section id="primera-vez">
+      <div class="rotulo-seccion">
+        <p class="lbl">El recorrido completo</p>
+        <span class="raya"></span>
+      </div>
+      <h2>La primera vez, de principio a fin</h2>
+      <p>
+        Seis pasos. Al final de ellos tendrás un rollo escaneado convertido en una
+        serie visible en la web. Después esto se hace en diez minutos y sin mirar
+        el manual.
+      </p>
+
+      <div class="pasos">
+
+        <div class="paso">
+          <div class="numero">01</div>
+          <div>
+            <h3>Subir el rollo</h3>
+            <p>
+              <strong>Subir</strong>, en el menú de la izquierda. El código del
+              rollo viene propuesto siguiendo al anterior —«Rollo 08» sugiere
+              «Rollo 09»— y la ficha del lote llega rellenada con la del rollo
+              pasado, porque lo normal es que no hayas cambiado de cámara.
+              Corrige lo que sea distinto.
+            </p>
+            <p>
+              Acepta <strong>JPEG, PNG, TIFF, WebP y AVIF</strong>. El RAW de
+              cámara hay que revelarlo antes: el panel no sabe abrirlo.
+            </p>
+            <p>
+              De cada escaneo se guardan dos cosas: la copia que sirve la web y,
+              si aporta algo, el <strong>escaneo original intacto</strong>. Ese
+              original no se enseña nunca en ninguna parte. Está para poder
+              rehacer la copia dentro de diez años sin volver a pasar el negativo
+              por el escáner.
+            </p>
+          </div>
+        </div>
+
+        <div class="paso">
+          <div class="numero">02</div>
+          <div>
+            <h3>Repartir en series</h3>
+            <p>
+              Terminada la subida, aterrizas en la <strong>Mesa de luz</strong>.
+              Ahí está el rollo entero como una hoja de contactos. Selecciona los
+              fotogramas que van juntos y usa <em>Asignar a una serie</em>.
+            </p>
+            <p>
+              Sólo puedes asignarlas a una serie que ya exista. La sección
+              <strong>Series</strong> del panel se quitó el 31 de agosto de
+              2026, así que <strong>crear una serie nueva pide tocar la base de
+              datos</strong>. Cada serie sigue abierta en su dirección y sigue
+              siendo donde vive cada fotografía; lo que ya no hay es dónde
+              administrarlas.
+            </p>
+          </div>
+        </div>
+
+        <div class="paso">
+          <div class="numero">03</div>
+          <div>
+            <h3>Escribir el texto alternativo</h3>
+            <p>
+              Pincha un fotograma para abrir su ficha. Hay muchos campos, pero
+              <strong>sólo uno es obligatorio: el texto alternativo</strong>.
+            </p>
+            <p>
+              Es la descripción de lo que se ve. La lee en voz alta quien no puede
+              ver la fotografía, y es lo único que Google entiende de una imagen.
+              Sin él, el paso 4 no te dejará continuar.
+            </p>
+            <p>
+              Descríbelo como se lo contarías por teléfono a alguien que no está
+              delante: <em>«Un maniquí sin cabeza tras el cristal de un escaparate
+              cerrado, reflejada la calle encima»</em>. No hace falta que sea
+              bonito; hace falta que sea cierto.
+            </p>
+          </div>
+        </div>
+
+        <div class="paso">
+          <div class="numero">04</div>
+          <div>
+            <h3>Publicar</h3>
+            <p>
+              De vuelta en la Mesa de luz, selecciona lo que ya esté listo y
+              publícalo. Si a alguna le falta el texto alternativo, el panel te
+              dice cuántas y no publica ninguna.
+            </p>
+            <p>
+              Despublicar se hace igual y en cualquier momento: la foto vuelve a
+              borrador y desaparece de la web. <strong>No se pierde nada.</strong>
+            </p>
+          </div>
+        </div>
+
+        <div class="paso">
+          <div class="numero">05</div>
+          <div>
+            <h3>Decidir qué manda en la portada</h3>
+            <p>
+              En <strong>Portada</strong> eliges la fotografía que abre el sitio
+              —la grande que recibe a quien entra—, el rollo que se enseña
+              debajo como hoja de contactos y qué secciones salen y en qué
+              orden.
+            </p>
+            <p>
+              El orden de las series se arrastraba en <strong>Series</strong>,
+              que ya no está: hoy es el que tengan guardado y no se cambia
+              desde el panel.
+            </p>
+          </div>
+        </div>
+
+        <div class="paso">
+          <div class="numero">06</div>
+          <div>
+            <h3>Mirarlo como lo mira cualquiera</h3>
+            <p>
+              Abre la web en otra pestaña y recórrela. Los cambios salen al
+              momento, sin esperar ni volver a publicar nada.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ————————————————— 4 ————————————————— -->
+    <section id="secciones">
+      <div class="rotulo-seccion">
+        <p class="lbl">El menú, de arriba abajo</p>
+        <span class="raya"></span>
+      </div>
+      <h2>Qué hay en cada sección</h2>
+      <p>
+        En el mismo orden en que aparecen a la izquierda del panel: la mesa de
+        luz arriba del todo, y debajo tres grupos —las páginas del sitio, lo
+        que se publica y el resto.
+      </p>
+
+      <div class="secciones">
+
+        <div class="seccion-panel">
+          <div class="nombre">Mesa de luz</div>
+          <div>
+            <p>El sitio donde más vas a estar. Un rollo entero como hoja de contactos: seleccionas, asignas a series, publicas y despublicas. Arriba se cambia de rollo.</p>
+          </div>
+        </div>
+
+        <div class="seccion-panel">
+          <div class="nombre">Sobre mí</div>
+          <div>
+            <p>Todo lo que se lee en esa página. Arriba, el texto: el título, las dos líneas de debajo y las secciones, que se añaden, se quitan y se mueven de sitio. Dentro de una sección, una línea en blanco empieza un párrafo nuevo.</p>
+            <p>Abajo, la fotografía que lo acompaña: eliges una del archivo —o la subes ahí mismo, arrastrándola a la caja— y escribes el pie si quieres que se lea algo debajo. Vale cualquiera, publicada o en borrador; ponerla ahí no la publica ni la mete en ninguna serie. Si no eliges ninguna, la página sale sólo con el texto.</p>
+            <p>Las cifras —series, fotogramas, rollos— y la lista de cámaras y películas no se escriben: salen contadas del archivo y se ponen al día solas.</p>
+          </div>
+        </div>
+
+        <div class="seccion-panel">
+          <div class="nombre">Errores</div>
+          <div>
+            <p>Las dos páginas que no se buscan pero se encuentran: la de dirección no encontrada (404) y la de fallo del servidor (500). Se les cambia el rótulo, el título y el texto, y se les puede poner una fotografía.</p>
+            <p>La de 404 la ve quien llega con un enlace roto —del blog antiguo, de un buscador, de un mensaje viejo—, así que es de las más leídas del sitio. Un campo en blanco vuelve al texto de fábrica.</p>
+          </div>
+        </div>
+
+        <div class="seccion-panel">
+          <div class="nombre">Portada</div>
+          <div>
+            <p>Lo que ve quien llega. Arriba se elige la fotografía que abre el sitio entre todas las del archivo —con buscador, y de sesenta en sesenta para que no se atasque—; si no eliges ninguna sale la última publicada y la portada se mueve sola con cada rollo nuevo.</p>
+            <p>Si la que quieres no está todavía, «Subir una fotografía nueva» la mete sin salir de ahí: se suelta encima de la caja o se busca en el equipo. Entra publicada, así que pide el texto alternativo antes. Y si eliges una que está en borrador, el botón cambia y te dice que la va a publicar.</p>
+            <p>Abajo están las piezas de la portada —la apertura, la hoja de contactos, la lista de series y la última entrada del cuaderno—: se apagan, se encienden, se mueven de orden y se les cambia el rótulo. Para moverlas, agárralas por el asa de la izquierda y suéltalas donde quieras: si arrastras la última entrada hasta arriba, se pone la primera y el resto baja. La raya roja te dice dónde va a caer antes de soltarla. Las flechas siguen ahí para el teclado y para el móvil, donde arrastrar no funciona. La última encendida no se deja apagar, para que la portada no se quede en blanco. En la hoja de contactos se elige además qué rollo se enseña.</p>
+          </div>
+        </div>
+
+        <div class="seccion-panel">
+          <div class="nombre">Aviso</div>
+          <div>
+            <p>El mensaje que lee quien entra por primera vez, sobre el uso de las fotografías por sistemas de inteligencia artificial.</p>
+            <p>Al guardar hay una casilla importante: ver el paso correspondiente más abajo.</p>
+          </div>
+        </div>
+
+        <div class="seccion-panel">
+          <div class="nombre">Subir</div>
+          <div>
+            <p>Escaneos nuevos. Un lote de una vez, con su ficha común y el ancho al que quieres que se sirva.</p>
+          </div>
+        </div>
+
+        <div class="seccion-panel">
+          <div class="nombre">Cuaderno</div>
+          <div>
+            <p>Los textos. Escribir, guardar como borrador y publicar cuando quieras. Arriba del todo, el interruptor de la página: ver el apartado de abajo.</p>
+          </div>
+        </div>
+
+        <div class="seccion-panel">
+          <div class="nombre">Categorías</div>
+          <div>
+            <p>Cómo se ordena la escritura. Son las etiquetas que se le ponen a cada texto —método, mirada, equipo, revelado— y los botones que filtran el cuaderno. Por tema y no por semana: es lo que hace que un texto de hace dos años se encuentre.</p>
+            <p>Aquí se crean, se les cambia el nombre y se quitan. Cada una dice cuántos textos la llevan y con qué dirección se filtra. Lo que escribas en una fila no se guarda solo: hace falta darle al botón, porque una categoría se lee en el sitio publicado y una tecla suelta no debería renombrar nada.</p>
+            <p>Borrar una categoría <strong>no borra ningún texto</strong>: los que la llevaban se quedan donde están, sin ella. Eso sí, volver a ponérsela es ir uno por uno, y por eso el aviso te dice a cuántos afecta antes de hacerlo.</p>
+            <p>No hace falta venir aquí para estrenar una: en el editor de cualquier texto, debajo de las categorías, hay una caja para añadir una nueva. Se crea al momento y entra ya marcada en el texto que tengas delante.</p>
+          </div>
+        </div>
+
+        <div class="seccion-panel">
+          <div class="nombre">Archivo</div>
+          <div>
+            <p>Todo lo publicado ordenado por fecha, para encontrar algo antiguo cuando no recuerdas de qué serie era.</p>
+          </div>
+        </div>
+
+        <div class="seccion-panel">
+          <div class="nombre">Mensajes</div>
+          <div>
+            <p>Lo que llega por el formulario de contacto. Se leen aquí; no se envía ningún correo. Los sin leer van marcados en rojo.</p>
+            <p>Aquí se escribe también tu correo público y tus redes, que son las que salen en la página de contacto. Déjalo en blanco y no se publica.</p>
+            <p>Y aquí se manda en la propia página de contacto: «La página de contacto» abre el interruptor y los seis textos que se leen en ella. Apagada, la dirección deja de existir —contesta «no encontrada», se cae del menú, del pie y del mapa del sitio, y nadie puede escribirte— hasta que la vuelvas a encender. Los mensajes que ya tengas siguen aquí.</p>
+          </div>
+        </div>
+
+        <div class="seccion-panel">
+          <div class="nombre">Visitas</div>
+          <div>
+            <p>Cuánta gente entra, por qué páginas pasa y de dónde viene. Sin cookies y sin saber quiénes son: se cuentan visitas, no personas.</p>
+            <p>Está preparado y a la espera de que se conecte el contador. Mientras tanto, la sección te explica qué falta.</p>
+          </div>
+        </div>
+
+        <div class="seccion-panel">
+          <div class="nombre">Pie</div>
+          <div>
+            <p>La frase que acompaña al nombre al final de todas las páginas. Se escribe una vez y sale en las nueve.</p>
+          </div>
+        </div>
+
+        <div class="seccion-panel">
+          <div class="nombre">Importar</div>
+          <div>
+            <p>Lo que trajo las entradas del blog antiguo. Ya cumplió su función; no hay que volver a tocarlo.</p>
+          </div>
+        </div>
+
+        <div class="seccion-panel">
+          <div class="nombre">Ajustes</div>
+          <div>
+            <p>Lo que antes había que pedirle a quien hizo el sitio. Son cinco bloques y cada uno se guarda con su botón, porque no se cambian a la vez.</p>
+            <p><strong>El sitio:</strong> cómo se llama, el lema que le acompaña en la portada, quién firma la obra y la descripción. Esa descripción es la que lee un buscador y la que sale al pegar el enlace en cualquier sitio, así que es la que de verdad conviene repasar. Debajo de cada campo va la cuenta de caracteres; lo que dejes en blanco vuelve al texto de fábrica.</p>
+            <p><strong>Las páginas:</strong> el párrafo que se lee debajo del título en <strong>Entradas</strong> y en <strong>Archivo</strong>. Es lo primero que ve quien llega a cada una, y lo que antes estaba escrito en el código. El del archivo dice que las direcciones antiguas del blog siguen funcionando: si algún día eso deja de ser verdad, se cambia aquí. Como en el bloque de arriba, lo que dejes en blanco vuelve al texto de fábrica.</p>
+            <p><strong>Las letras:</strong> ocho parejas cerradas, y cada tarjeta enseña las letras de verdad —el titular, el texto y los datos técnicos—, no una descripción de cómo son. Debajo de cada muestra van los tres nombres con su clase: qué letra hace los titulares (serif), cuál el texto (sans) y cuál los datos (monoespaciada). La que está puesta va marcada como «Actual», y arriba del todo se lee cuál es sin tener que buscarla entre las ocho. Se elige una y se guarda: cambia el sitio entero. No hay una caja donde escribir el nombre de una fuente cualquiera, y es a propósito: las tres familias de cada pareja las sirve este sitio, sin pedirle nada a ningún servidor de fuera. Es lo mismo que promete el aviso de entrada.</p>
+            <p><strong>Las fotografías:</strong> a cuántos píxeles se sirven. Es el ancho con el que entra cada escaneo nuevo, y sólo manda en escritorio: en móvil el navegador pide siempre la copia que le quepa. La casilla de abajo lo aplica además a todo lo que ya está en el archivo. No es peligrosa: el fichero guardado no se toca, lo único que cambia es cuántos píxeles pide el navegador, y se vuelve atrás eligiendo otro ancho y marcándola otra vez.</p>
+            <p><strong>La cuenta:</strong> tu nombre, el correo con el que entras aquí —no el de contacto, ese va en Mensajes— y la contraseña. Para cambiar cualquiera de las tres hay que escribir la de ahora, aunque sólo toques el nombre: es lo que impide que quien se siente delante de una sesión olvidada se quede con el sitio. Cambiar la contraseña no te echa de aquí, pero la vieja deja de valer en cualquier otro sitio.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <h3>Encender y apagar páginas del sitio</h3>
+      <p>
+        Dos páginas se pueden apagar: <strong>las entradas</strong> (arriba de
+        Entradas) y <strong>la de contacto</strong> (dentro de Mensajes). El
+        índice de series también se podía, hasta que esa página se quitó del
+        sitio entero el 31 de agosto de 2026. No todo el mundo
+        escribe, y un enlace en el menú que sólo lleva a una página vacía dice de
+        ti algo que no es verdad.
+      </p>
+      <p>
+        Apagada, la dirección contesta «no encontrada» y desaparece del menú, del
+        pie y del mapa del sitio. El interruptor se guarda solo, sin botón.
+      </p>
+      <p class="suelto">
+        <strong>Lo que cuelga de ella no se apaga.</strong> Es importante y es a
+        propósito: sin el índice de series, cada serie sigue abierta en su
+        dirección y se llega a ella desde el archivo, desde la portada y desde el
+        buscador; sin el cuaderno, cada texto publicado sigue igual. Lo que
+        desaparece es la lista, no la obra. La serie es la unidad de navegación
+        del sitio —el archivo, la portada y cada ficha de fotografía enlazan a la
+        suya—, y apagar también lo que cuelga dejaría medio sitio apuntando a
+        páginas que no existen.
+      </p>
+      <p>
+        La de contacto es la excepción: de ella no cuelga nada, así que apagarla
+        sí cierra el paso del todo y nadie puede escribirte. Los mensajes que ya
+        tuvieras siguen en su sitio.
+      </p>
+    </section>
+
+    <!-- ————————————————— 5 ————————————————— -->
+    <section id="cuaderno">
+      <div class="rotulo-seccion">
+        <p class="lbl">Los textos</p>
+        <span class="raya"></span>
+      </div>
+      <h2>Escribir en el cuaderno</h2>
+      <p class="suelto">
+        Se escribe en texto normal. Una línea en blanco separa un párrafo del
+        siguiente. Sólo hay dos marcas que aprender, y las dos son opcionales:
+      </p>
+
+      <div class="tabla-marco">
+        <table>
+          <thead>
+            <tr><th>Si escribes</th><th>Sale</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="px">&gt; texto</td>
+              <td>Una cita destacada, con su filete rojo a la izquierda.</td>
+            </tr>
+            <tr>
+              <td class="px">[foto:ID] pie</td>
+              <td>Una fotografía tuya intercalada en el texto, con su pie. El identificador lo copias del selector de fotos del propio editor.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Poner un vídeo de YouTube</h3>
+      <p class="suelto">
+        No hay botón: se pega en el texto y ya está. Vale cualquiera de las dos
+        cosas que da YouTube al pulsar <strong>Compartir</strong> — la dirección
+        corta (<code>https://youtu.be/OU8mkKhATjA</code>) o el trozo
+        de <code>&lt;iframe&gt;</code> de «Insertar» —. En cuanto lo
+        sueltes, la línea se convierte en un bloque con el nombre del vídeo, y
+        en <strong>Previsualizar</strong> se ve ya el reproductor tal como
+        saldrá publicado.
+      </p>
+      <p class="suelto">
+        Tiene que ir en su propia línea, solo. Una dirección de YouTube en
+        mitad de una frase se queda como lo que es —un enlace—, que es lo que
+        se busca cuando se cita un vídeo de pasada sin querer plantarlo entero
+        en medio del párrafo.
+      </p>
+      <p class="suelto">
+        Del <code>&lt;iframe&gt;</code> que pegues no se guarda
+        nada: sólo el nombre del vídeo. El reproductor lo pone después el
+        sitio, y lo pide a <code>youtube-nocookie.com</code>, que es
+        el dominio en el que Google no escribe nada en el navegador de quien
+        pasa por la página mientras no le dé al play.
+      </p>
+
+      <h3>La dirección sigue al título</h3>
+      <p class="suelto">
+        La dirección de una entrada sale de su título:
+        «Revelar en casa» vive en <code>/entradas/revelar-en-casa</code>. Si le
+        corriges el título, <strong>la dirección cambia con él</strong> — antes
+        se quedaba con la errata puesta para siempre.
+      </p>
+      <p class="suelto">
+        No se rompe nada al hacerlo: la dirección anterior queda apuntando a la
+        nueva, y quien llegue por ella —un enlace que mandaste, un buscador que
+        todavía no se ha enterado— acaba en la entrada igual. Al guardar, el
+        panel te dice cuál es la dirección nueva. Lo mismo vale para las
+        direcciones del blog antiguo, que también llevan aquí.
+      </p>
+
+      <h3>Los tres estados de una entrada</h3>
+      <div class="estados">
+        <div class="estado">
+          <span class="pastilla gris">Borrador</span>
+          <span class="que">No la ve nadie. Escribe con tranquilidad y guarda las veces que quieras.</span>
+        </div>
+        <div class="estado">
+          <span class="pastilla roja">Programada</span>
+          <span class="que">Apartada con una fecha anotada. <strong>No se publica sola</strong> — lee el aviso de abajo.</span>
+        </div>
+        <div class="estado">
+          <span class="pastilla verde">Pública</span>
+          <span class="que">En la web. Aparece en el cuaderno, en el archivo y en las series que hayas citado.</span>
+        </div>
+      </div>
+
+      <div class="aviso">
+        <span class="titulo">Que no te pille</span>
+        <p>
+          <strong>«Programada» no publica nada por sí sola.</strong> No hay nadie
+          esperando a que llegue la fecha para darle al botón. Es una nota para ti,
+          no una orden para el programa.
+        </p>
+        <p>
+          Si quieres que una entrada salga el día 3, ese día tienes que entrar y
+          ponerla en <em>Pública</em>. Si lo que quieres es que salga con fecha del
+          día 3, ponla pública y escribe esa fecha: es la que se enseña.
+        </p>
+      </div>
+    </section>
+
+    <!-- ————————————————— 6 ————————————————— -->
+    <section id="portada">
+      <div class="rotulo-seccion">
+        <p class="lbl">Lo que ve quien llega</p>
+        <span class="raya"></span>
+      </div>
+      <h2>Mandar en la portada</h2>
+
+      <h3>Las piezas de la portada</h3>
+      <p>
+        La portada son cuatro cosas, una debajo de otra: la <em>apertura</em>
+        (una fotografía a toda pantalla), la <em>hoja de contactos</em> de un
+        rollo, la <em>lista de series</em> y la <em>última entrada</em> del
+        cuaderno, con la misma fila del archivo. En <em>Portada</em> se decide
+        cuáles salen, en qué orden y con qué rótulo, y cuál es la fotografía que
+        abre.
+      </p>
+      <p class="suelto">
+        Apagar una no borra nada: la hoja de contactos sigue en su rollo, las
+        series en su página y el texto en el cuaderno. Sólo deja de verse al
+        entrar. Y si una no tiene nada que enseñar —ningún texto publicado
+        todavía, por ejemplo— el panel te lo dice en rojo, para que no parezca
+        que el interruptor está roto.
+      </p>
+
+      <h3>Los tres estados de una serie</h3>
+      <p class="suelto">
+        Se cambiaban pinchando en <em>Series</em>, sección que ya no existe:
+        hoy cada serie se queda con el estado que tenga. Siguen mandando en lo
+        que se ve y por eso siguen aquí explicados:
+      </p>
+      <div class="estados">
+        <div class="estado">
+          <span class="pastilla verde">Pública</span>
+          <span class="que">Terminada y a la vista.</span>
+        </div>
+        <div class="estado">
+          <span class="pastilla roja">En curso</span>
+          <span class="que">Se ve, y se dice que sigue abierta. Es lo normal en un trabajo que continúa.</span>
+        </div>
+        <div class="estado">
+          <span class="pastilla gris">Oculta</span>
+          <span class="que">No existe para quien visita la web. Ni la serie ni sus fotos.</span>
+        </div>
+      </div>
+
+      <h3>El ancho al que se sirve una foto</h3>
+      <p>
+        Se elige al subir el lote y se puede corregir después foto a foto. No es el
+        tamaño con que se ve —eso lo decide la pantalla— sino cuántos píxeles se
+        mandan:
+      </p>
+      <div class="tabla-marco">
+        <table>
+          <thead>
+            <tr><th>Ancho</th><th>Cuándo</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="px">800 px</td><td>Ligera. Suficiente para leer la foto en un portátil.</td></tr>
+            <tr><td class="px">1200 px</td><td>Por omisión, y lo que casi siempre quieres. Llena una pantalla de escritorio.</td></tr>
+            <tr><td class="px">1600 px</td><td>Monitores grandes, o cuando quieras que se aprecie el grano.</td></tr>
+            <tr><td class="px">2048 px</td><td>Casi el escaneo. Pesa, y se descarga con más facilidad.</td></tr>
+            <tr><td class="px">Sin límite</td><td>El escaneo tal cual. Piénsatelo dos veces.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Cuanto más ancho, mejor se ve y más fácil se lo pones a quien quiera
+        quedársela. <strong>1200 es el equilibrio</strong>, y por eso es el que
+        viene puesto.
+      </p>
+    </section>
+
+    <!-- ————————————————— 7 ————————————————— -->
+    <section id="reglas">
+      <div class="rotulo-seccion">
+        <p class="lbl">Media docena de cosas</p>
+        <span class="raya"></span>
+      </div>
+      <h2>Reglas que no se saltan</h2>
+      <ul>
+        <li><strong>Sin texto alternativo no se publica.</strong> No es una manía del programa: es lo que hace que la fotografía exista para quien no puede verla y para los buscadores.</li>
+        <li><strong>Subir nunca publica.</strong> Todo entra en borrador. Publicar es siempre una decisión aparte y consciente.</li>
+        <li><strong>Despublicar no borra.</strong> La foto vuelve a borrador y ahí sigue, con su ficha entera, hasta que quieras.</li>
+        <li><strong>Borrar una entrada del cuaderno sí es definitivo.</strong> No hay papelera. Si dudas, ponla en borrador en vez de borrarla.</li>
+        <li><strong>El escaneo original no se enseña jamás.</strong> Lo que ve el público es siempre la copia reducida. El original está guardado y fuera del alcance de cualquiera.</li>
+        <li><strong>Los cambios salen al momento.</strong> No hay que publicar el sitio ni esperar nada. Guardas y ya está en la web.</li>
+      </ul>
+
+      <div class="aviso">
+        <span class="titulo">La casilla del aviso</span>
+        <p>
+          Al guardar el aviso de entrada hay una casilla que dice
+          <em>«volver a enseñárselo a quien ya lo cerró»</em>.
+        </p>
+        <p>
+          Márcala <strong>sólo si has cambiado lo que el mensaje dice</strong>. Si
+          arreglas una errata y la marcas, el aviso vuelve a saltarle a todo el
+          mundo, incluidos los que ya lo habían leído y cerrado. Para una coma,
+          déjala sin marcar.
+        </p>
+      </div>
+    </section>
+
+    <!-- ————————————————— 8 ————————————————— -->
+    <section id="donde-vive">
+      <div class="rotulo-seccion">
+        <p class="lbl">Las tripas, en cristiano</p>
+        <span class="raya"></span>
+      </div>
+      <h2>Dónde vive todo esto</h2>
+      <p class="suelto">
+        Tu obra está repartida en tres sitios, y <strong>ninguno de los tres es
+        el servidor donde corre la web</strong>. Eso no es una complicación
+        gratuita: es lo que hace que rehacer el servidor —o perderlo— no te
+        cueste ni una fotografía ni una línea de lo que has escrito.
+      </p>
+
+      <h3>Las fotografías — en un cubo privado de Backblaze B2</h3>
+      <p>
+        No están en el disco del servidor. Están en un almacén aparte, y el cubo
+        es <strong>privado</strong>: no existe ninguna dirección de Backblaze que
+        funcione desde fuera. Ni para ti ni para nadie.
+      </p>
+      <ul>
+        <li><strong>Nadie ve nunca una dirección de Backblaze.</strong> Las copias salen por <code>/foto/…</code>, que es una dirección de tu propio sitio. Él va a buscarlas y las entrega. Quién pasa y quién no lo decide el sitio, no el almacén.</li>
+        <li><strong>Dentro del cubo hay dos sitios y la diferencia importa.</strong> En <code>web/</code> vive la copia reducida, la que se sirve. En <code>originales/</code> vive el escaneo tal y como salió del escáner, y <strong>esa carpeta no se sirve jamás</strong>: no hay dirección que llegue hasta ella. Está para poder rehacer una copia sin volver a pasar el negativo, no para que se descargue.</li>
+        <li><strong>Van siempre por HTTPS</strong>, tanto al subirlas como al servirlas: el tramo entre tu navegador, el sitio y Backblaze viaja cifrado de punta a punta.</li>
+        <li><strong>El cifrado en reposo es un ajuste del cubo</strong>, no algo que el sitio pida foto a foto. Se enciende en la consola de Backblaze (lo llaman <em>SSE-B2</em>) y a partir de ahí cifra lo que entre. Si te importa —y con negativos ajenos debería—, comprueba que esté puesto: es una casilla en los ajustes del cubo.</li>
+      </ul>
+
+      <h3>Lo escrito — en una base Postgres, en Neon</h3>
+      <p>
+        Todo lo que no es una imagen: las series, la ficha de cada fotografía con
+        sus datos técnicos, los textos del cuaderno, las categorías, los mensajes
+        que te llegan, los ajustes del sitio y tu propia cuenta.
+      </p>
+      <ul>
+        <li><strong>Tampoco vive en el servidor.</strong> Neon es un servicio aparte, y la conexión entre los dos va cifrada: Neon no acepta conexiones que no lo estén.</li>
+        <li><strong>Tu contraseña no está ahí.</strong> Lo que se guarda es un resumen suyo hecho con bcrypt a doce vueltas, del que no se puede volver atrás. Ni quién hizo el sitio ni nadie con la base delante puede leer tu contraseña; lo único que se puede hacer es ponerte otra.</li>
+        <li><strong>La sesión del panel es un testigo firmado.</strong> Por eso cambiar la contraseña no te echa de donde estás, pero la vieja deja de valer en cualquier otro sitio.</li>
+      </ul>
+
+      <h3>El programa — una imagen de Docker, en Render</h3>
+      <p>
+        El servidor no guarda nada tuyo: lleva el programa y punto. Lo único que
+        escribe en su disco son las fotografías <em>ya reducidas</em> por el
+        optimizador —una caché—, para no tener que volver a generarlas una a una
+        cada vez que se despliega. Si ese disco se borrase, se regenerarían solas.
+      </p>
+      <p>
+        Delante hay <strong>Cloudflare</strong>, que guarda copias de las imágenes
+        repartidas por el mundo para que la web abra rápido, y que habla con
+        Render en modo <em>Full (strict)</em>: también ese tramo va cifrado.
+      </p>
+
+      <div class="aviso">
+        <span class="titulo">Lo que esto significa para ti</span>
+        <p>
+          Que <strong>el servidor es reemplazable</strong>. Si un día se cae, se
+          rompe o hay que rehacerlo entero, no se pierde ni una fotografía, ni un
+          texto, ni un mensaje: todo eso está en los otros dos sitios. Lo único
+          que se pierde es una caché que se vuelve a hacer sola.
+        </p>
+        <p>
+          Y que <strong>los originales no son públicos</strong>. Lo que enseña la
+          web es siempre la copia reducida. El escaneo de verdad está guardado,
+          en un cubo privado y en una carpeta que ninguna dirección alcanza.
+        </p>
+      </div>
+    </section>
+
+    <!-- ————————————————— 9 ————————————————— -->
+    <section id="problemas">
+      <div class="rotulo-seccion">
+        <p class="lbl">Cuando algo no cuadra</p>
+        <span class="raya"></span>
+      </div>
+      <h2>Si algo va mal</h2>
+
+      <h3>No me deja publicar unas fotos</h3>
+      <p>Les falta el texto alternativo. El mensaje te dice cuántas. Ábrelas, descríbelas y vuelve a intentarlo.</p>
+
+      <h3>He publicado una serie y no sale en la web</h3>
+      <p>Será que está en <em>Oculta</em>: así no existe para el público por muchas fotografías publicadas que tenga. Se veía y se cambiaba en <em>Series</em>, que ya no está, así que hoy esto se mira en la base de datos.</p>
+
+      <h3>He puesto una entrada en «Programada» y no aparece</h3>
+      <p>Funciona como está previsto. «Programada» no publica sola: hay que ponerla en <em>Pública</em> a mano.</p>
+
+      <h3>Una foto tarda en cargar la primera vez</h3>
+      <p>Es normal. La primera vez que alguien pide una fotografía a un tamaño concreto, el servidor la prepara. A partir de ahí queda guardada y sale al instante para todo el mundo.</p>
+
+      <h3>He perdido la contraseña</h3>
+      <p>No se puede recuperar, sólo cambiar por una nueva. Pídeselo a quien lleva el mantenimiento del sitio: es cosa de un minuto.</p>
+
+      <div class="nota-lateral">
+        <p>
+          Lo que este manual no cubre —conectar el contador de visitas, cambiar el
+          dominio, mover el archivo de sitio— es mantenimiento, no uso diario, y
+          está documentado aparte para quien lleve la parte técnica.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="final">
+    <span>Photo Jhon · manual del cuarto oscuro</span>
+    <span>La unidad es la serie, no la fecha</span>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,26 +1,736 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------------------
+   Photo Jhon — sistema de diseño «Hoja de contactos».
+   Los valores salen de diseno/fuente/part1.html y part2.html; no se redondean
+   ni se sustituyen por los de ningún framework.
+   --------------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------------
+   La paleta, en dos temas.
+
+   El oscuro es el del sistema: el cuarto oscuro con la copia sobre la mesa.
+   El claro no es su inversión automática —invertir un #100E0D da un blanco de
+   quirófano— sino su traducción a papel: fondos de baritado cálido, tinta que
+   no llega al negro puro y filos que se ven sin cortar.
+
+   Dos cosas NO cambian de tema, y es a propósito:
+     · El gris de montaje al 18 %. Es una referencia fotográfica, no un color
+       de marca: una copia se monta sobre el mismo gris haya la luz que haya.
+     · Los degradados y pies que van ENCIMA de una fotografía. Ahí el fondo es
+       la foto, no la página, y el texto se lee en claro en los dos temas.
+   --------------------------------------------------------------------------- */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+
+  /* Cuarto oscuro */
+  --p-cuarto: #100e0d;
+  --p-cuarto-2: #0c0a09;
+  --p-cuarto-3: #0a0908;
+  --p-marco: #191614;
+
+  /* Papel baritado */
+  --p-papel: #ede7de;
+  --p-papel-2: #beb5aa;
+  --p-dato: #9c938a;
+
+  /* Filo de línea */
+  --p-filo: #2c2622;
+  --p-filo-2: #4a423b;
+  --p-apagado: #5c554e;
+
+  /* Marca de encuadre */
+  --p-rojo: #d9503a;
+  --p-rojo-2: #e0664f;
+  --p-verde: #7c9470;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root[data-tema="claro"] {
+  color-scheme: light;
+
+  /* El papel manda: lo que era fondo de cuarto pasa a ser hoja */
+  --p-cuarto: #f4f1ea;
+  --p-cuarto-2: #ebe5da;
+  --p-cuarto-3: #e2dbcd;
+  --p-marco: #dcd4c4;
+
+  /* Y lo que era papel pasa a ser tinta. Nunca negro puro: mancha */
+  --p-papel: #17130f;
+  --p-papel-2: #443b31;
+  --p-dato: #6a6055;
+
+  /* Filos que se ven sin cortar la página */
+  --p-filo: #d3c9b9;
+  --p-filo-2: #ab9e8b;
+  --p-apagado: #8b8073;
+
+  /* El rojo de encuadre, un punto más oscuro para que aguante sobre papel */
+  --p-rojo: #b83f28;
+  --p-rojo-2: #9c3320;
+  --p-verde: #55704b;
 }
 
-@media (prefers-color-scheme: dark) {
+@theme {
+  --color-cuarto: var(--p-cuarto);
+  --color-cuarto-2: var(--p-cuarto-2);
+  --color-cuarto-3: var(--p-cuarto-3);
+  --color-marco: var(--p-marco);
+
+  --color-papel: var(--p-papel);
+  --color-papel-2: var(--p-papel-2);
+  --color-dato: var(--p-dato);
+
+  --color-filo: var(--p-filo);
+  --color-filo-2: var(--p-filo-2);
+  --color-apagado: var(--p-apagado);
+
+  --color-rojo: var(--p-rojo);
+  --color-rojo-2: var(--p-rojo-2);
+  --color-verde: var(--p-verde);
+
+  /* Gris fotográfico 18 %: el fondo sobre el que se monta una copia. El mismo
+     en los dos temas, por lo dicho arriba. */
+  --color-montaje: #767676;
+
+  --font-serif: var(--tipo-serif), Georgia, "Times New Roman", serif;
+  --font-sans: var(--tipo-sans), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: var(--tipo-mono), ui-monospace, Menlo, Consolas, monospace;
+
+  --radius-none: 0px;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    border-radius: 0;
+  }
+
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Alto exacto de la cabecera. Lo usan la propia cabecera y las pantallas
+       que quieren ocupar justo el resto de la ventana (la ficha de foto). Si
+       se toca aquí, se mueven las dos a la vez. */
+    --alto-cabecera: 60px;
+
+    /* Lo que ocupa la barra inferior en móvil y tableta, más el hueco de la
+       barra del sistema. En escritorio no hay barra inferior. */
+    --hueco-nav-inferior: calc(56px + env(safe-area-inset-bottom));
+  }
+
+  @media (min-width: 64rem) {
+    :root {
+      --alto-cabecera: 72px;
+      --hueco-nav-inferior: 0px;
+    }
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-cuarto);
+    color: var(--color-papel);
+    font-family: var(--font-sans);
+    font-size: 17px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-rojo);
+    outline-offset: 2px;
+  }
+
+  input,
+  textarea,
+  select {
+    font: inherit;
+    color: var(--color-papel);
+    background: var(--color-cuarto-3);
+    border: 1px solid var(--color-filo);
+    padding: 0.42rem 0.6rem;
+    width: 100%;
+    resize: none;
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: 1px solid var(--color-rojo);
+    outline-offset: -1px;
+  }
+
+  /* Las casillas quedaban dentro de la regla de arriba y salían estiradas a
+     todo el ancho: un `width: 100%` no tiene sentido en un cuadrado. Se les
+     devuelve su tamaño y se dibujan a mano —cuadrado de filo, rojo de encuadre
+     al marcar—, que el control del sistema no pega con el resto del panel. */
+  input[type="checkbox"] {
+    appearance: none;
+    flex: none;
+    width: 0.95rem;
+    height: 0.95rem;
+    padding: 0;
+    background: var(--color-cuarto-3);
+    border: 1px solid var(--color-filo-2);
+    cursor: pointer;
+  }
+
+  input[type="checkbox"]:hover:not(:disabled) {
+    border-color: var(--color-rojo);
+  }
+
+  input[type="checkbox"]:checked {
+    background: var(--color-rojo);
+    border-color: var(--color-rojo);
+  }
+
+  /* El tic va enmascarado y no dibujado: así toma el color del fondo del
+     cuarto y se lee tanto sobre el rojo oscuro como sobre el de papel. Si
+     algún navegador no pintara el pseudoelemento, queda el cuadro rojo, que
+     ya dice por sí solo que está marcada. */
+  input[type="checkbox"]:checked::after {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: var(--color-cuarto);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.4l3.4 3.4L13 4.6' fill='none' stroke='%23000' stroke-width='2.4'/%3E%3C/svg%3E")
+      center / 0.68rem no-repeat;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.4l3.4 3.4L13 4.6' fill='none' stroke='%23000' stroke-width='2.4'/%3E%3C/svg%3E")
+      center / 0.68rem no-repeat;
+  }
+
+  /* Ni todas ni ninguna: un guion, que con `appearance: none` hay que poner
+     a mano igual que el tic. */
+  input[type="checkbox"]:indeterminate {
+    background: var(--color-rojo);
+    border-color: var(--color-rojo);
+  }
+
+  input[type="checkbox"]:indeterminate::after {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 100%;
+    background:
+      linear-gradient(var(--color-cuarto), var(--color-cuarto)) center / 0.5rem
+      1.5px no-repeat;
+  }
+
+  input[type="checkbox"]:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  ::placeholder {
+    color: var(--color-apagado);
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  .scroll-fino {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-filo) transparent;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  /* La etiqueta en versalitas monoespaciada que recorre todo el sistema */
+  .lbl {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-dato);
+  }
+
+  .lbl-sitio {
+    font-size: 0.75rem;
+    letter-spacing: 0.16em;
+  }
+
+  /* --- Mandos sobre una fotografía -----------------------------------------
+     El visor es cuarto oscuro en los dos temas: una copia se mira sobre fondo
+     bajo, haya la luz que haya en la página. Por eso sus mandos NO usan los
+     tokens de color —que al pasar a claro se vuelven tinta oscura sobre fondo
+     oscuro, es decir, invisibles— sino los valores fijos del cuarto. Misma
+     regla que `.marco-pie`: lo que va encima de una foto no cambia de tema. */
+  .mando-visor {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ede7de;
+    border: 1px solid #6b6157;
+    background: rgb(25 22 20 / 0.72);
+    transition:
+      color 0.2s,
+      border-color 0.2s,
+      background-color 0.2s;
+  }
+
+  .mando-visor:hover {
+    color: #e0664f;
+    border-color: #d9503a;
+    background: rgb(217 80 58 / 0.16);
+  }
+
+  .texto-visor {
+    color: #ede7de;
+  }
+
+  .dato-visor {
+    color: #9c938a;
+  }
+
+  /* --- Interruptor de tema -------------------------------------------------
+     Qué figura se enseña lo decide el atributo del `html`, no un estado de
+     React: el tema lo pone un guión antes de pintar, y si el componente
+     tuviera que averiguarlo después habría un parpadeo en cada carga. */
+  :root[data-tema="claro"] .si-oscuro {
+    display: none;
+  }
+
+  :root:not([data-tema="claro"]) .si-claro {
+    display: none;
+  }
+
+  /* --- Ancho de página ----------------------------------------------------
+     Las pantallas anchas no mejoran estirándolo todo: una fila de archivo de
+     1.800 px deja la fecha en una punta y el destino en la otra, y una hoja de
+     contactos de cinco columnas se vuelve un cartel. El contenido se para aquí
+     y se centra; los márgenes laterales los sigue poniendo cada página. */
+  .ancho-sitio {
+    width: 100%;
+    max-width: 90rem; /* 1440 px */
+    margin-inline: auto;
+  }
+
+  /* --- Marcas de encuadre -------------------------------------------------
+     Las ocho esquinas en rojo que aparecen al pasar por encima de un
+     fotograma. Es la firma del sistema; se reutiliza en la hoja de contactos,
+     en la mesa de luz y en los resultados de búsqueda. */
+  .marco {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    background: var(--color-marco);
+  }
+
+  /* El hueco fija la proporción (aspect-[3/2] o aspect-[2/3]); la imagen la
+     rellena. next/image en modo `fill` se posiciona absoluta dentro. */
+  .marco img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: contrast(1.04);
+    transition:
+      transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1),
+      filter 0.4s,
+      opacity 0.3s;
+  }
+
+  .marco:hover img {
+    transform: scale(1.035);
+    filter: contrast(1.12) brightness(1.06);
+  }
+
+  .marco::after {
+    content: "";
+    position: absolute;
+    inset: 12px;
+    opacity: 0;
+    z-index: 3;
+    pointer-events: none;
+    transition:
+      opacity 0.25s,
+      inset 0.25s;
+    --b: linear-gradient(var(--color-rojo), var(--color-rojo));
+    background:
+      var(--b) 0 0 / 18px 1px no-repeat,
+      var(--b) 0 0 / 1px 18px no-repeat,
+      var(--b) 100% 0 / 18px 1px no-repeat,
+      var(--b) 100% 0 / 1px 18px no-repeat,
+      var(--b) 0 100% / 18px 1px no-repeat,
+      var(--b) 0 100% / 1px 18px no-repeat,
+      var(--b) 100% 100% / 18px 1px no-repeat,
+      var(--b) 100% 100% / 1px 18px no-repeat;
+  }
+
+  .marco:hover::after {
+    opacity: 0.55;
+    inset: 9px;
+  }
+
+  .marco[data-elegido="si"]::after {
+    opacity: 1;
+    inset: 9px;
+  }
+
+  .marco[data-elegido="si"] {
+    outline: 1px solid var(--color-rojo);
+    outline-offset: -1px;
+  }
+
+  .marco[data-atenuado="si"] img {
+    opacity: 0.5;
+  }
+
+  .marco-no {
+    position: absolute;
+    top: 0.4rem;
+    left: 0.5rem;
+    z-index: 3;
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.1em;
+    color: rgb(237 231 222 / 0.8);
+    mix-blend-mode: difference;
+  }
+
+  .marco-pie {
+    position: absolute;
+    inset: auto 0 0 0;
+    z-index: 3;
+    padding: 1.1rem 0.5rem 0.4rem;
+    text-align: left;
+    background: linear-gradient(0deg, rgb(10 9 8 / 0.9), transparent);
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.04em;
+    color: var(--color-papel);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* --- Botones ----------------------------------------------------------- */
+  .btn {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.55rem 1rem;
+    border: 1px solid var(--color-filo);
+  }
+
+  .btn:hover {
+    border-color: var(--color-filo-2);
+    background: color-mix(in oklab, var(--color-papel) 5%, transparent);
+  }
+
+  .btn-p {
+    background: var(--color-rojo);
+    border-color: var(--color-rojo);
+    color: var(--color-cuarto);
+    font-weight: 500;
+  }
+
+  .btn-p:hover {
+    background: var(--color-rojo-2);
+    border-color: var(--color-rojo-2);
+  }
+
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* --- Segmentos y pestañas ---------------------------------------------- */
+  .seg {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-dato);
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--color-filo);
+    margin-left: -1px;
+  }
+
+  .seg:hover {
+    color: var(--color-papel);
+    border-color: var(--color-filo-2);
+  }
+
+  .seg[data-on="si"] {
+    color: var(--color-papel);
+    border-color: var(--color-rojo);
+    background: color-mix(in oklab, var(--color-rojo) 10%, transparent);
+    position: relative;
+    z-index: 1;
+  }
+
+  .pestana {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--color-dato);
+    padding: 0.85rem 0.1rem;
+    border-bottom: 1px solid transparent;
+    margin-bottom: -1px;
+  }
+
+  .pestana:hover {
+    color: var(--color-papel);
+  }
+
+  .pestana[data-on="si"] {
+    color: var(--color-papel);
+    border-bottom-color: var(--color-rojo);
+  }
+
+  /* --- Navegación del panel ---------------------------------------------- */
+  .nav-i {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    width: 100%;
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-dato);
+    border-left: 2px solid transparent;
+  }
+
+  .nav-i:hover {
+    color: var(--color-papel);
+    background: color-mix(in oklab, var(--color-papel) 5%, transparent);
+  }
+
+  .nav-i[data-on="si"] {
+    color: var(--color-papel);
+    border-left-color: var(--color-rojo);
+    background: color-mix(in oklab, var(--color-rojo) 8%, transparent);
+  }
+
+  /* --- Navegación del sitio ---------------------------------------------- */
+  .nav-sitio a {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-dato);
+    padding-bottom: 3px;
+    border-bottom: 1px solid transparent;
+  }
+
+  .nav-sitio a:hover,
+  .nav-sitio a[data-on="si"] {
+    color: var(--color-papel);
+    border-bottom-color: var(--color-rojo);
+  }
+
+  /* --- Ficha técnica ------------------------------------------------------ */
+  .exif > div {
+    display: grid;
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    gap: 0.75rem;
+    border-bottom: 1px dotted var(--color-filo);
+    padding-bottom: 0.5rem;
+  }
+
+  .exif dt {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-dato);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .exif dd {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    margin: 0;
+  }
+
+  /* --- Zona de arrastre --------------------------------------------------- */
+  .soltar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.9rem;
+    width: 100%;
+    padding: 1.05rem;
+    border: 1px dashed var(--color-filo-2);
+    color: var(--color-dato);
+    transition:
+      border-color 0.2s,
+      color 0.2s;
+  }
+
+  .soltar:hover,
+  .soltar[data-encima="si"] {
+    border-color: var(--color-rojo);
+    color: var(--color-papel);
+  }
+
+  /* ------------------------------------------------------------------------
+     El cuerpo de una entrada, que se escribe en el panel con TinyMCE y llega
+     como HTML. Aquí se le pone la forma del sitio: los tamaños salen de las
+     variables de /admin/ajustes —`--texto`, `--interlinea`, `--medida`—, así
+     que un texto escrito hace un año cambia de tamaño con el resto cuando se
+     toca ese ajuste.
+
+     Se estila desde fuera, por la clase del contenedor, porque el HTML
+     guardado no lleva ni una clase: eso es lo que permite cambiar el diseño
+     del sitio sin volver a tocar lo escrito.
+     --------------------------------------------------------------------- */
+  .cuerpo > * + * {
+    margin-top: 1.15em;
+  }
+
+  .cuerpo p {
+    max-width: var(--medida, 64ch);
+  }
+
+  .cuerpo h1,
+  .cuerpo h2,
+  .cuerpo h3,
+  .cuerpo h4,
+  .cuerpo h5,
+  .cuerpo h6 {
+    font-family: var(--tipo-serif);
+    font-weight: 700;
+    line-height: 1.15;
+    max-width: var(--medida, 64ch);
+    margin-top: 1.8em;
+  }
+
+  .cuerpo h1 {
+    font-size: 1.9rem;
+  }
+  .cuerpo h2 {
+    font-size: 1.6rem;
+  }
+  .cuerpo h3 {
+    font-size: 1.35rem;
+  }
+  .cuerpo h4 {
+    font-size: 1.15rem;
+  }
+  .cuerpo h5 {
+    font-size: 1rem;
+  }
+  .cuerpo h6 {
+    font-family: var(--tipo-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-dato);
+  }
+
+  .cuerpo ul,
+  .cuerpo ol {
+    max-width: var(--medida, 64ch);
+    padding-left: 1.4rem;
+  }
+
+  .cuerpo ul {
+    list-style: disc;
+  }
+  .cuerpo ol {
+    list-style: decimal;
+  }
+
+  .cuerpo li + li {
+    margin-top: 0.4em;
+  }
+
+  .cuerpo blockquote {
+    max-width: var(--medida, 64ch);
+    border-left: 2px solid var(--color-rojo);
+    padding-left: 1.25rem;
+    font-family: var(--tipo-serif);
+    font-style: italic;
+    font-size: 1.2em;
+    line-height: 1.4;
+  }
+
+  .cuerpo blockquote cite {
+    display: block;
+    margin-top: 0.75rem;
+    font-family: var(--tipo-mono);
+    font-size: 0.7rem;
+    font-style: normal;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-dato);
+  }
+
+  .cuerpo a {
+    color: var(--color-papel);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .cuerpo a:hover {
+    color: var(--color-rojo);
+  }
+
+  .cuerpo code {
+    font-family: var(--tipo-mono);
+    font-size: 0.92em;
+    color: var(--color-papel);
+  }
+
+  .cuerpo hr {
+    max-width: var(--medida, 64ch);
+    border: 0;
+    border-top: 1px solid var(--color-filo);
+    margin-block: 2em;
+  }
+
+  .cuerpo table {
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+  }
+
+  .cuerpo th,
+  .cuerpo td {
+    border: 1px solid var(--color-filo);
+    padding: 0.4rem 0.7rem;
+    text-align: left;
+  }
+
+  .cuerpo th {
+    font-family: var(--tipo-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-dato);
+  }
 }

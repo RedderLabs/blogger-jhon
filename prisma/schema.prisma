@@ -1,0 +1,247 @@
+// Photo Jhon — esquema del archivo.
+//
+// La unidad de navegación es la SERIE, no la fecha (ver diseno/README.md).
+// Las fotos entran por ROLLO (el lote que se escanea de una vez) y desde ahí
+// se reparten en series; una foto puede estar en más de una.
+//
+// Los estados van como String, con el conjunto de valores documentado junto a
+// cada campo. Venía impuesto por SQLite y se mantiene al pasar a Postgres:
+// convertirlos en enums ahora obligaría a una migración por cada valor nuevo,
+// y estos cambian más que el esquema.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Usuario {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  nombre       String
+  passwordHash String
+  creadoEn     DateTime @default(now())
+}
+
+/// Un trabajo con principio y, a veces, final.
+model Serie {
+  id        String  @id @default(cuid())
+  slug      String  @unique
+  nombre    String
+  /// Las dos o tres frases que se leen bajo el título en /series/[slug]
+  nota      String?
+  anoInicio Int
+  /// null = serie abierta
+  anoFin    Int?
+  /// "publica" | "en_curso" | "oculta"
+  estado    String  @default("en_curso")
+  /// Orden de /series; lo fija el panel arrastrando la lista
+  orden     Int     @default(0)
+
+  portadaId String? @unique
+  portada   Foto?   @relation("PortadaDeSerie", fields: [portadaId], references: [id], onDelete: SetNull)
+
+  fotos    FotoEnSerie[]
+  entradas EntradaEnSerie[]
+
+  creadaEn      DateTime @default(now())
+  actualizadaEn DateTime @updatedAt
+
+  @@index([orden])
+}
+
+/// El lote: lo que sale de una sesión de escaneo. Aquí viven los datos
+/// técnicos comunes que después se copian en cada ficha.
+model Rollo {
+  id       String   @id @default(cuid())
+  codigo   String   @unique
+  fecha    DateTime
+  camara   String?
+  optica   String?
+  pelicula String?
+  revelado String?
+  notas    String?
+
+  fotos Foto[]
+
+  creadoEn DateTime @default(now())
+}
+
+model Foto {
+  id      String @id @default(cuid())
+  rolloId String
+  rollo   Rollo  @relation(fields: [rolloId], references: [id], onDelete: Cascade)
+  /// Número de fotograma dentro del rollo
+  orden   Int
+
+  /// La copia que sirve la web: JPEG, tope 2400 px de lado mayor.
+  archivo String
+  ancho   Int
+  alto    Int
+
+  /// El escaneo tal y como se subió (TIFF de 16 bits, JPEG de cámara, lo que
+  /// sea). No se sirve nunca: está para poder rehacer la copia web sin volver
+  /// a escanear el negativo. null si se subió ya como JPEG pequeño.
+  archivoOriginal String?
+
+  /// Ancho máximo al que se muestra la copia en escritorio, en píxeles.
+  /// Se elige al subir el lote y se puede corregir foto a foto; por debajo
+  /// de eso el navegador recibe la versión que le toque por densidad y ancho
+  /// de pantalla. 0 = servir el escaneo entero.
+  anchoMax Int @default(1200)
+
+  titulo String @default("Sin título")
+  /// Obligatorio antes de publicar: es lo único que Google lee de una foto
+  alt    String @default("")
+  nota   String?
+
+  camara    String?
+  optica    String?
+  pelicula  String?
+  ei        String?
+  apertura  String?
+  velocidad String?
+  revelado  String?
+  escaneo   String?
+  lugar     String?
+  fecha     DateTime?
+
+  /// "borrador" | "publicada"
+  estado String @default("borrador")
+
+  /// La huella del fichero servido: sirve para encontrar duplicados en
+  /// /admin/galeria. Es el MD5 que el propio cubo devuelve en el ETag, así
+  /// que calcularla no obliga a descargarse las fotografías. null = todavía
+  /// sin calcular; una foto sin huella no se compara con nada.
+  hash String?
+
+  /// La huella de lo que se ve, no del fichero: 64 bits sacados de la imagen
+  /// reducida a 9×8 en gris. Dos escaneos de la misma fotografía guardados con
+  /// distinta compresión —lo que dejó el traslado del blog— tienen ficheros
+  /// distintos y esta huella casi igual. null = todavía sin calcular.
+  visual String?
+
+  series          FotoEnSerie[]
+  portadaDeSerie  Serie?           @relation("PortadaDeSerie")
+  imagenDeEntrada Entrada[]        @relation("ImagenDeEntrada")
+  enAjustes       Ajuste[]         @relation("FotoDeAjuste")
+
+  creadaEn      DateTime @default(now())
+  actualizadaEn DateTime @updatedAt
+
+  @@unique([rolloId, orden])
+  @@index([estado])
+  @@index([hash])
+}
+
+/// Una foto puede pertenecer a varias series. `principal` marca cuál manda
+/// en la ficha y en las flechas de teclado.
+model FotoEnSerie {
+  fotoId    String
+  foto      Foto    @relation(fields: [fotoId], references: [id], onDelete: Cascade)
+  serieId   String
+  serie     Serie   @relation(fields: [serieId], references: [id], onDelete: Cascade)
+  /// Posición dentro de la serie
+  posicion  Int
+  principal Boolean @default(false)
+
+  @@id([fotoId, serieId])
+  @@index([serieId, posicion])
+}
+
+/// Las entradas: los textos, con su propia casa.
+model Entrada {
+  id         String  @id @default(cuid())
+  slug       String  @unique
+  titulo     String
+  kicker     String?
+  entradilla String?
+  /// Bloques del editor, serializados: [{tipo:"p"|"cita"|"figura"|…, …}]
+  cuerpo     String  @default("[]")
+
+  /// "borrador" | "programada" | "publica"
+  estado      String    @default("borrador")
+  publicadoEn DateTime?
+  palabras    Int       @default(0)
+
+  imagenId String?
+  imagen   Foto?   @relation("ImagenDeEntrada", fields: [imagenId], references: [id], onDelete: SetNull)
+
+  temas  EntradaEnTema[]
+  series EntradaEnSerie[]
+
+  /// Dirección en Blogger, para la redirección 301
+  urlAntigua String?
+
+  creadaEn      DateTime @default(now())
+  actualizadaEn DateTime @updatedAt
+
+  @@index([estado, publicadoEn])
+}
+
+/// Temas en vez de semanas: método, mirada, equipo, crítica…
+model Tema {
+  id     String @id @default(cuid())
+  slug   String @unique
+  nombre String
+
+  entradas EntradaEnTema[]
+}
+
+model EntradaEnTema {
+  entradaId String
+  entrada   Entrada @relation(fields: [entradaId], references: [id], onDelete: Cascade)
+  temaId    String
+  tema      Tema    @relation(fields: [temaId], references: [id], onDelete: Cascade)
+
+  @@id([entradaId, temaId])
+}
+
+/// El enlace va en los dos sentidos: la entrada aparece en la página de la serie.
+model EntradaEnSerie {
+  entradaId String
+  entrada   Entrada @relation(fields: [entradaId], references: [id], onDelete: Cascade)
+  serieId   String
+  serie     Serie   @relation(fields: [serieId], references: [id], onDelete: Cascade)
+
+  @@id([entradaId, serieId])
+}
+
+/// Pares clave/valor del sitio: foto de apertura, hoja del mes, textos del pie.
+model Ajuste {
+  clave String  @id
+  valor String?
+
+  fotoId String?
+  foto   Foto?   @relation("FotoDeAjuste", fields: [fotoId], references: [id], onDelete: SetNull)
+
+  actualizadoEn DateTime @updatedAt
+}
+
+/// Lo que el importador de Blogger deja escrito para que no se rompa
+/// ningún enlace guardado.
+model Redireccion {
+  desde String   @id
+  hacia String
+  creadaEn DateTime @default(now())
+}
+
+/// Lo que llega por /contacto. No se manda ningún correo: no hay proveedor
+/// configurado y una web que promete un envío y lo pierde por silencio es
+/// peor que ninguna. El mensaje se guarda aquí y se lee en /admin/mensajes.
+model Mensaje {
+  id     String @id @default(cuid())
+  nombre String
+  correo String
+  /// De qué va: "copia" | "archivo" | "encargo" | "otra"
+  asunto String @default("otra")
+  cuerpo String
+
+  leido    Boolean  @default(false)
+  creadoEn DateTime @default(now())
+
+  @@index([leido, creadoEn])
+}
