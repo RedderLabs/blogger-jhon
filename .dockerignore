@@ -19,3 +19,6 @@ lib/generated
 # TinyMCE se copia de node_modules dentro de la imagen, en el prebuild: mandar
 # los 5,4 MB en el contexto sería mandarlos para volver a generarlos.
 public/tinymce
+
+# El manual de despliegue no lo usa el sitio.
+docs

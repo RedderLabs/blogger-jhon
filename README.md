@@ -114,9 +114,8 @@ Falta por hacer: servir las redirecciones (un `proxy.ts` que consulte la tabla
 
 ## Publicar en Render
 
-La imagen se construye **desde tu máquina**, no desde el repositorio: `dev.db`
-está en `.gitignore`. Las fotografías ya no dependen de esto —viven en
-Backblaze— pero la base sí.
+La imagen se construye **desde tu máquina** y se sube a un registro; Render
+sólo la levanta.
 
 ```bash
 npm run blog:traer && npm run blog:fotos   # que el archivo esté al día
@@ -126,6 +125,18 @@ docker push topgambajrjdeveloper/jhonbosch-photography:latest
 
 Después, en Render: **New → Web Service → Deploy an existing image**, o aplicando
 `render.yaml` como Blueprint, que ya lleva el nombre de la imagen puesto.
+
+Ya no hay ninguna razón para que la imagen se construya aquí: la base se mudó a
+Postgres y las fotografías a Backblaze, así que el repositorio tiene todo lo que
+hace falta para compilar y ningún secreto viaja dentro. Sigue haciéndose así
+porque Render, en el plan que hay contratado, no compila. Coolify sí.
+
+## Publicar en Coolify
+
+En **[docs/coolify.md](docs/coolify.md)**: qué hay que tener antes, el esquema
+que hay que aplicar a mano, los dos caminos (que compile Coolify desde GitHub o
+traerle la imagen hecha), las variables una a una, el volumen de `/datos` y qué
+mirar cuando algo no arranca.
 
 ## Dónde viven las fotografías
 
